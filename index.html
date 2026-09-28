@@ -12,10 +12,10 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .mono { font-family: 'JetBrains Mono', monospace; }
 
-    @keyframes marsScanSweep {
+    @keyframes scanSweep {
       0% { top: 0%; opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
       100% { top: 100%; opacity: 0; }
     }
 
@@ -24,62 +24,64 @@
       left: 0;
       width: 100%;
       height: 4px;
-      background: linear-gradient(90deg, rgba(249,115,22,0) 0%, rgba(249,115,22,1) 50%, rgba(249,115,22,0) 100%);
-      box-shadow: 0 0 25px #f97316, 0 0 50px #ea580c;
+      background: linear-gradient(90deg, transparent 0%, #ff6a00 30%, #38bdf8 50%, #ff6a00 70%, transparent 100%);
+      box-shadow: 0 0 20px #ff6a00, 0 0 40px #38bdf8;
       display: none;
-      z-index: 25;
+      z-index: 35;
       pointer-events: none;
     }
 
     .scanning .mars-laser {
       display: block;
-      animation: marsScanSweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation: scanSweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
-    .martian-grid {
-      background-size: 28px 28px;
+    .hud-grid {
+      background-size: 32px 32px;
       background-image: 
-        linear-gradient(to right, rgba(249, 115, 22, 0.08) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(249, 115, 22, 0.08) 1px, transparent 1px);
+        linear-gradient(to right, rgba(255, 106, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 106, 0, 0.05) 1px, transparent 1px);
     }
 
-    @keyframes pulseBox {
+    @keyframes pulseTarget {
       0%, 100% { transform: scale(1); opacity: 0.95; }
       50% { transform: scale(1.02); opacity: 1; }
     }
 
-    .hud-box {
-      animation: pulseBox 2s infinite ease-in-out;
+    .target-box {
+      animation: pulseTarget 2s infinite ease-in-out;
     }
+
+    @keyframes beaconBlink {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; filter: drop-shadow(0 0 8px #ef4444); }
+    }
+    .beacon { animation: beaconBlink 1.2s infinite; }
   </style>
 </head>
-<body class="bg-[#07060c] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-orange-500 selection:text-black">
+<body class="bg-[#040306] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-orange-500 selection:text-black">
 
-  <!-- MARS ATMOSPHERIC TELEMETRY BAR -->
-  <div class="bg-[#100b17] border-b border-orange-950/70 px-4 py-2 flex flex-wrap items-center justify-between text-xs mono text-orange-300/80 relative z-30">
+  <!-- TOP ORBITAL TELEMETRY STRIP -->
+  <div class="bg-[#0a060e] border-b border-orange-950/60 px-4 py-2 flex flex-wrap items-center justify-between text-xs mono text-orange-300/80">
     <div class="flex items-center gap-3">
       <span class="flex items-center gap-1.5 text-orange-400 font-bold">
         <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
-        JEZERO CRATER // SECTOR 04B
+        JEZERO HABITAT SECTOR 04 // ACTIVE STRUCTURAL DECK
       </span>
-      <span class="text-orange-900">|</span>
-      <span>PRESSURE: <strong id="telemetry-pressure" class="text-orange-200">610 Pa</strong></span>
       <span class="text-orange-900 hidden sm:inline">|</span>
-      <span class="hidden sm:inline">TEMP: <strong id="telemetry-temp" class="text-orange-200">-63°C</strong></span>
+      <span class="hidden sm:inline">ATMOSPHERE: <strong class="text-slate-200">VACUUM (0.006 BAR)</strong></span>
       <span class="text-orange-900 hidden md:inline">|</span>
-      <span class="hidden md:inline">RADIATION: <strong id="telemetry-rad" class="text-orange-200">240 µSv/h</strong></span>
+      <span class="hidden md:inline">RADIATION: <strong class="text-orange-300">280 µSv/h</strong></span>
     </div>
-    <div class="flex items-center gap-4 text-[11px]">
-      <button type="button" onclick="toggleAudio()" id="audio-toggle" class="cursor-pointer hover:text-orange-400 transition flex items-center gap-1 text-emerald-400 active:scale-95">
-        <span id="audio-icon">🔊</span> AUDIO: <span id="audio-status">ON</span>
-      </button>
+    <div class="flex items-center gap-3 text-[11px]">
+      <span class="text-slate-400">CREW EVA: <strong class="text-sky-400">2 ACTIVE SUITS</strong></span>
       <span class="text-orange-900">|</span>
-      <span>STARLINK: <strong class="text-emerald-400">SYNCED</strong></span>
+      <span class="text-emerald-400 font-bold">STARLINK SYNCED</span>
     </div>
   </div>
 
-  <!-- NAVIGATION -->
-  <header class="border-b border-orange-950/80 bg-[#0c0813]/95 backdrop-blur sticky top-0 z-40">
+  <!-- HEADER -->
+  <header class="border-b border-orange-950/70 bg-[#07040a]/90 backdrop-blur sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-orange-500/30">
@@ -87,54 +89,216 @@
         </div>
         <div class="flex items-baseline gap-2">
           <span class="font-extrabold text-lg tracking-tight text-white">DROPPE</span>
-          <span class="text-xs font-mono font-bold text-orange-400 tracking-widest bg-orange-950/70 border border-orange-800/80 px-1.5 py-0.5 rounded">MARS-OPS</span>
+          <span class="text-xs font-mono font-bold text-orange-400 tracking-widest bg-orange-950/70 border border-orange-800/80 px-1.5 py-0.5 rounded">MARS SIGHT</span>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Storm Simulator Toggle -->
-        <button type="button" onclick="toggleDustStorm()" id="storm-btn" class="cursor-pointer px-3 py-1.5 text-xs font-mono text-orange-300 bg-orange-950/50 hover:bg-orange-900/70 border border-orange-800/80 rounded-lg transition active:scale-95 flex items-center gap-1.5">
-          <span>🌪️</span> <span class="hidden sm:inline">Simulate</span> Dust Storm
-        </button>
-
-        <!-- Custom Image Uploader -->
-        <label class="cursor-pointer px-3 py-1.5 text-xs font-mono text-slate-300 bg-slate-900 hover:bg-slate-800 border border-orange-950 rounded-lg transition active:scale-95 flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-          <span class="hidden sm:inline">Custom</span> Feed
-          <input type="file" id="image-loader" accept="image/*" class="hidden" onchange="handleImageUpload(event)" />
-        </label>
-
-        <!-- Audit Action -->
-        <button type="button" onclick="runMarsAudit()" id="scan-btn" class="cursor-pointer px-4 py-2 text-xs font-bold bg-orange-500 hover:bg-orange-400 text-slate-950 rounded-lg shadow-lg shadow-orange-500/25 transition active:scale-95 flex items-center gap-2 mono">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-          Run Surface Audit
-        </button>
-      </div>
+      <button type="button" onclick="runMarsAudit()" id="scan-btn" class="cursor-pointer px-4 py-2 text-xs font-bold bg-orange-500 hover:bg-orange-400 active:scale-95 text-slate-950 rounded-lg shadow-lg shadow-orange-500/25 transition flex items-center gap-2 mono">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        Run Autonomous Site Audit
+      </button>
     </div>
   </header>
 
   <!-- MAIN HUD -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- LEFT: MARTIAN HUD VIEWPORT (8 COLS) -->
+    <!-- VIEWPORT (8 COLS) -->
     <div class="lg:col-span-8 flex flex-col gap-4">
       <div class="relative bg-black rounded-2xl border border-orange-950/80 overflow-hidden shadow-2xl" id="canvas-container">
         
-        <div class="relative w-full aspect-[16/10] overflow-hidden bg-black" id="viewport-frame">
-          <!-- Mars Surface Terrain (NASA JPL Mastcam Panorama) -->
-          <img 
-            id="viewport-image"
-            src="https://upload.wikimedia.org/wikipedia/commons/d/dc/PIA16225_Mars_Curiosity_sol_64_Mastcam.jpg" 
-            alt="Mars Jezero Crater Surface" 
-            class="w-full h-full object-cover filter contrast-110 saturate-125 transition-all duration-700 pointer-events-none select-none"
-          />
+        <!-- THE SCENE VIEWPORT -->
+        <div class="relative w-full aspect-[16/10] overflow-hidden bg-[#030105]">
+          
+          <!-- CINEMATIC VECTOR MARS CONSTRUCTION SCENE -->
+          <svg class="w-full h-full object-cover select-none" viewBox="0 0 1200 750" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Deep Dark Space Sky -->
+              <linearGradient id="deepSpaceSky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#020004" />
+                <stop offset="40%" stop-color="#0a030c" />
+                <stop offset="70%" stop-color="#24080a" />
+                <stop offset="100%" stop-color="#4d120a" />
+              </linearGradient>
 
-          <!-- Atmospheric Canvas (Dynamic Regolith Dust Particles) -->
-          <canvas id="dust-canvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
+              <!-- Martian Regolith Surface -->
+              <linearGradient id="marsSurface" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#5a180b" />
+                <stop offset="25%" stop-color="#3d0e06" />
+                <stop offset="60%" stop-color="#210703" />
+                <stop offset="100%" stop-color="#0f0301" />
+              </linearGradient>
 
-          <!-- Atmosphere & Grid Overlay -->
-          <div class="absolute inset-0 bg-gradient-to-t from-[#140803]/80 via-transparent to-[#1a0c05]/40 pointer-events-none z-10"></div>
-          <div class="absolute inset-0 martian-grid pointer-events-none opacity-40 z-10"></div>
+              <!-- Curved Gold Specular Helmet Visor -->
+              <radialGradient id="goldVisor" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#fef08a" />
+                <stop offset="35%" stop-color="#eab308" />
+                <stop offset="75%" stop-color="#a16207" />
+                <stop offset="100%" stop-color="#451a03" />
+              </radialGradient>
+
+              <!-- Industrial Scaffolding Beam Pattern -->
+              <linearGradient id="steelBeam" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#1e293b" />
+                <stop offset="50%" stop-color="#475569" />
+                <stop offset="100%" stop-color="#0f172a" />
+              </linearGradient>
+
+              <!-- Habitat Amber Glow -->
+              <radialGradient id="domeGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffedd5" stop-opacity="0.9" />
+                <stop offset="60%" stop-color="#f97316" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+
+            <!-- 1. Deep Space Sky -->
+            <rect width="1200" height="750" fill="url(#deepSpaceSky)" />
+
+            <!-- Twinkling Distant Stars -->
+            <g fill="#ffffff">
+              <circle cx="120" cy="60" r="1.2" opacity="0.9" />
+              <circle cx="280" cy="40" r="1.5" opacity="0.7" />
+              <circle cx="450" cy="90" r="0.8" opacity="0.6" />
+              <circle cx="680" cy="50" r="1.3" opacity="0.8" />
+              <circle cx="890" cy="80" r="1.6" opacity="0.85" />
+              <circle cx="1040" cy="35" r="1.0" opacity="0.5" />
+              <circle cx="210" cy="140" r="0.9" opacity="0.4" />
+              <circle cx="580" cy="130" r="1.4" opacity="0.7" />
+              <circle cx="820" cy="110" r="0.7" opacity="0.8" />
+              <circle cx="1140" cy="120" r="1.3" opacity="0.9" />
+            </g>
+
+            <!-- Distant Earth & Moon High in Dark Sky -->
+            <circle cx="1080" cy="100" r="7" fill="#38bdf8" />
+            <circle cx="1081" cy="99" r="6" fill="#0284c7" />
+            <circle cx="1092" cy="94" r="2" fill="#e2e8f0" opacity="0.8" /> <!-- Moon -->
+
+            <!-- Distant Crater Ridge Rim -->
+            <path d="M0 430 Q 300 320, 680 390 T 1200 360 L 1200 750 L 0 750 Z" fill="#2d0b06" opacity="0.95" />
+            <path d="M0 480 Q 380 390, 840 450 T 1200 420 L 1200 750 L 0 750 Z" fill="url(#marsSurface)" />
+
+            <!-- Geodesic Habitat Domes in Background -->
+            <path d="M 80 480 A 180 180 0 0 1 380 480 Z" fill="#0d0c14" stroke="#f97316" stroke-width="2" opacity="0.8" />
+            <circle cx="230" cy="430" r="70" fill="url(#domeGlow)" opacity="0.4" />
+            <line x1="80" y1="480" x2="380" y2="480" stroke="#f97316" stroke-width="2" opacity="0.5" />
+            
+            <!-- Communications Tower with Blinking Aircraft Beacon -->
+            <line x1="230" y1="300" x2="230" y2="180" stroke="#94a3b8" stroke-width="3" />
+            <line x1="210" y1="230" x2="250" y2="230" stroke="#94a3b8" stroke-width="2" />
+            <circle cx="230" cy="180" r="5" fill="#ef4444" class="beacon" />
+
+            <!-- Industrial Crane & Scaffolding System -->
+            <g id="scaffolding-structure">
+              <!-- Vertical Main Columns -->
+              <rect x="880" y="210" width="22" height="380" fill="url(#steelBeam)" />
+              <rect x="1100" y="240" width="18" height="350" fill="url(#steelBeam)" />
+              <!-- Horizontal High-Rise Crane Boom -->
+              <rect x="660" y="210" width="500" height="18" fill="url(#steelBeam)" />
+              <!-- Cross Bracing Lattice -->
+              <line x1="880" y1="240" x2="1100" y2="330" stroke="#ff8800" stroke-width="2" opacity="0.6" />
+              <line x1="1100" y1="240" x2="880" y2="330" stroke="#ff8800" stroke-width="2" opacity="0.6" />
+              <line x1="880" y1="330" x2="1100" y2="420" stroke="#ff8800" stroke-width="2" opacity="0.6" />
+              <line x1="1100" y1="330" x2="880" y2="420" stroke="#ff8800" stroke-width="2" opacity="0.6" />
+              <!-- Warning Beacon on Crane Tip -->
+              <circle cx="660" cy="218" r="4" fill="#ef4444" class="beacon" />
+            </g>
+
+            <!-- Suspended Heavy Modular I-Beam -->
+            <rect x="360" y="475" width="450" height="24" rx="3" fill="#334155" stroke="#f97316" stroke-width="1.5" />
+            <rect x="360" y="481" width="450" height="12" fill="#1e293b" />
+            <!-- Droppe Platform Branding on Steel -->
+            <text x="440" y="490" fill="#f8fafc" font-family="monospace" font-size="10" font-weight="bold" letter-spacing="3" opacity="0.9">DROPPE INFRASTRUCTURE // OUTPOST 04</text>
+
+            <!-- ============================================== -->
+            <!-- WORKER 1: HIGH-ALTITUDE WELDER (CENTER-LEFT)   -->
+            <!-- ============================================== -->
+            <g id="welder-contractor">
+              <!-- Suit Shadows -->
+              <ellipse cx="505" cy="465" rx="55" ry="18" fill="#000000" opacity="0.6" />
+              
+              <!-- Back Oxygen & Life Support Rig -->
+              <rect x="475" y="380" width="30" height="75" rx="10" fill="#1e293b" stroke="#0ea5e9" stroke-width="2.5" />
+              <circle cx="490" cy="405" r="5" fill="#38bdf8" />
+              
+              <!-- Torso / Heavy EVA Pressurized Jumpsuit -->
+              <ellipse cx="510" cy="425" rx="42" ry="52" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2" />
+              
+              <!-- Hi-Vis Droppe Safety Harness -->
+              <path d="M 485 385 L 492 468 M 535 385 L 528 468 M 474 425 L 546 425" stroke="#f97316" stroke-width="7" stroke-linecap="round" />
+              <rect x="496" y="416" width="18" height="18" rx="3" fill="#0f172a" />
+              <text x="500" y="429" fill="#38bdf8" font-family="monospace" font-size="9" font-weight="bold">D</text>
+
+              <!-- Legs & Articulated Knee Pads -->
+              <path d="M 490 470 L 465 520 L 440 525" stroke="#cbd5e1" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+              <path d="M 530 470 L 545 520 L 570 525" stroke="#cbd5e1" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+              <!-- Puncture Mark on Welder Right Leg -->
+              <circle cx="465" cy="518" r="4" fill="#e11d48" />
+
+              <!-- Heavy Grip Mag-Boots Clamped to Beam -->
+              <rect x="420" y="515" width="34" height="20" rx="6" fill="#0f172a" stroke="#475569" stroke-width="2" />
+              <rect x="555" y="515" width="34" height="20" rx="6" fill="#0f172a" stroke="#475569" stroke-width="2" />
+
+              <!-- Left & Right Arm Holding Plasma Torch -->
+              <path d="M 478 405 Q 440 435 470 470" stroke="#e2e8f0" stroke-width="22" stroke-linecap="round" fill="none" />
+              <path d="M 542 405 Q 560 450 500 480" stroke="#e2e8f0" stroke-width="20" stroke-linecap="round" fill="none" />
+
+              <!-- Plasma Welding Torch Body -->
+              <rect x="465" y="468" width="45" height="12" rx="3" fill="#1e293b" />
+              
+              <!-- Helmet & Specular Gold Bubble Visor -->
+              <circle cx="510" cy="358" r="32" fill="#f8fafc" stroke="#64748b" stroke-width="2" />
+              <ellipse cx="510" cy="360" rx="23" ry="19" fill="url(#goldVisor)" />
+
+              <!-- Torch Plasma Arc Point -->
+              <circle id="torch-arc" cx="460" cy="474" r="8" fill="#38bdf8" />
+              <circle cx="460" cy="474" r="3" fill="#ffffff" />
+            </g>
+
+            <!-- ============================================== -->
+            <!-- WORKER 2: RIGGING & COMPLIANCE LEAD (FOREGROUND)-->
+            <!-- ============================================== -->
+            <g id="lead-contractor">
+              <!-- Suit Torso -->
+              <ellipse cx="780" cy="530" rx="52" ry="68" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2" />
+
+              <!-- Heavy Life Support Canister Unit -->
+              <rect x="742" y="475" width="76" height="85" rx="12" fill="#1e293b" stroke="#f97316" stroke-width="2" />
+              <text x="752" y="525" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="bold">DROPPE O₂</text>
+              <rect x="752" y="534" width="56" height="6" rx="2" fill="#0f172a" />
+              <rect x="752" y="534" width="46" height="6" rx="2" fill="#eab308" />
+
+              <!-- High-Vis Vest Straps -->
+              <path d="M 746 470 L 746 590 M 814 470 L 814 590 M 732 540 L 828 540" stroke="#eab308" stroke-width="8" />
+
+              <!-- Bulky Pressurized Trousers -->
+              <rect x="745" y="590" width="32" height="110" rx="14" fill="#cbd5e1" />
+              <rect x="785" y="590" width="32" height="110" rx="14" fill="#cbd5e1" />
+
+              <!-- Heavy Magnetic Boots -->
+              <rect x="735" y="685" width="48" height="26" rx="7" fill="#0f172a" stroke="#475569" stroke-width="2" />
+              <rect x="785" y="685" width="48" height="26" rx="7" fill="#0f172a" stroke="#475569" stroke-width="2" />
+
+              <!-- Left Arm Holding Diagnostic Tablet -->
+              <path d="M 735 500 Q 695 540 730 580" stroke="#f1f5f9" stroke-width="24" stroke-linecap="round" fill="none" />
+              <rect x="705" y="565" width="40" height="28" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+              <line x1="712" y1="575" x2="738" y2="575" stroke="#38bdf8" stroke-width="2" />
+              <line x1="712" y1="582" x2="730" y2="582" stroke="#22c55e" stroke-width="2" />
+
+              <!-- Right Arm Resting -->
+              <path d="M 825 500 Q 860 540 840 580" stroke="#f1f5f9" stroke-width="24" stroke-linecap="round" fill="none" />
+
+              <!-- Pressurized Helmet & Visor -->
+              <circle cx="780" cy="435" r="38" fill="#f8fafc" stroke="#94a3b8" stroke-width="2.5" />
+              <ellipse cx="780" cy="438" rx="27" ry="22" fill="url(#goldVisor)" />
+            </g>
+          </svg>
+
+          <!-- DUST & SPARKS PARTICLE ENGINE (HTML5 CANVAS) -->
+          <canvas id="sparks-canvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
+
+          <!-- HUD Grid Overlay -->
+          <div class="absolute inset-0 hud-grid pointer-events-none opacity-40 z-20"></div>
 
           <!-- Laser Scan Line -->
           <div class="mars-laser" id="laser"></div>
@@ -145,63 +309,58 @@
           <div class="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-orange-500 pointer-events-none z-20"></div>
           <div class="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-orange-500 pointer-events-none z-20"></div>
 
-          <!-- TARGET 1: LIFE SUPPORT RIG -->
-          <div id="box-1" class="hud-box absolute hidden border-2 border-emerald-400 bg-emerald-500/15 rounded z-30 cursor-pointer transition hover:bg-emerald-500/30" style="top: 48%; left: 42%; width: 18%; height: 28%;" onclick="inspectTarget('Regolith Filter', 'Nominal', 'EN 14593-M Active (99.1% Scrub)')">
+          <!-- ============================================== -->
+          <!-- COMPUTER VISION DETECTION BOUNDING BOXES        -->
+          <!-- ============================================== -->
+
+          <!-- TARGET 1: WELDER VISOR (EN 166 UV-C PASS) -->
+          <div id="box-1" class="target-box absolute hidden border-2 border-emerald-400 bg-emerald-500/15 rounded z-30" style="top: 42%; left: 39%; width: 9%; height: 12%;">
             <div class="absolute -top-6 left-0 bg-emerald-950/95 border border-emerald-500 text-emerald-300 text-[10px] mono px-2 py-0.5 rounded shadow whitespace-nowrap">
-              ✓ EN 14593-M (O₂ Nominal)
+              ✓ EN 166 (UV-C Gold Visor OK)
             </div>
           </div>
 
-          <!-- TARGET 2: PRESSURE HULL BREACH -->
-          <div id="box-2" class="hud-box absolute hidden border-2 border-rose-500 bg-rose-500/20 rounded shadow-lg shadow-rose-500/30 z-30 cursor-pointer transition hover:bg-rose-500/35" style="top: 60%; left: 62%; width: 15%; height: 16%;" onclick="inspectTarget('Pressure Breach', 'CRITICAL', 'Regolith seal bleed: 14 Pa/s')">
-            <div class="absolute -bottom-7 right-0 bg-rose-950/95 border border-rose-500 text-rose-300 text-[10px] mono px-2 py-0.5 rounded flex items-center gap-1 shadow whitespace-nowrap">
+          <!-- TARGET 2: SUIT REGOLITH PUNCTURE (CRITICAL VACUUM BREACH) -->
+          <div id="box-2" class="target-box absolute hidden border-2 border-rose-500 bg-rose-500/20 rounded shadow-lg shadow-rose-500/30 z-30" style="top: 65%; left: 35%; width: 10%; height: 12%;">
+            <div class="absolute -bottom-7 left-0 bg-rose-950/95 border border-rose-500 text-rose-300 text-[10px] mono px-2 py-0.5 rounded flex items-center gap-1 shadow whitespace-nowrap">
               <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
-              CRITICAL: Puncture (14 Pa/s)
+              CRITICAL: Knee Tear (Seal Bleed: 14 Pa/s)
             </div>
           </div>
 
-          <!-- TARGET 3: RADIATION SHIELDING -->
-          <div id="box-3" class="hud-box absolute hidden border-2 border-amber-400 bg-amber-500/20 rounded z-30 cursor-pointer transition hover:bg-amber-500/35" style="top: 36%; left: 24%; width: 16%; height: 20%;" onclick="inspectTarget('Ion Shielding', 'WARNING', 'Surface exposure exceeds 420 mSv/a')">
-            <div class="absolute -bottom-6 left-0 bg-amber-950/90 border border-amber-500 text-amber-300 text-[10px] mono px-2 py-0.5 rounded shadow whitespace-nowrap">
-              ⚡ WARNING: Shield Wear (>420 mSv)
+          <!-- TARGET 3: CONTRACTOR O2 SCRUBBER (WEAR WARNING) -->
+          <div id="box-3" class="target-box absolute hidden border-2 border-amber-400 bg-amber-500/20 rounded z-30" style="top: 60%; left: 61%; width: 9%; height: 15%;">
+            <div class="absolute -bottom-6 right-0 bg-amber-950/90 border border-amber-500 text-amber-300 text-[10px] mono px-2 py-0.5 rounded shadow whitespace-nowrap">
+              ⚡ WARNING: Canister Scrub Saturation 88%
             </div>
           </div>
+
         </div>
 
-        <!-- Canvas Controls -->
-        <div class="p-3 bg-[#0d0914] border-t border-orange-950/70 flex items-center justify-between text-xs mono relative z-30">
-          <div class="flex items-center gap-2">
-            <span class="text-orange-300/70">Feed Select:</span>
-            <button type="button" onclick="switchMarsFeed(1)" id="feed-btn-1" class="cursor-pointer px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-bold text-[11px] transition active:scale-95">Jezero Basin 04</button>
-            <button type="button" onclick="switchMarsFeed(2)" id="feed-btn-2" class="cursor-pointer px-2.5 py-1 rounded bg-slate-900 border border-orange-950 text-orange-200/80 text-[11px] transition active:scale-95 hover:bg-slate-800">Windjana Drill Site</button>
-          </div>
-          <span class="text-orange-500/60 text-[11px]">GRAV: 0.38g // YOLO-v8 EXT ACTIVE</span>
+        <!-- CANVAS FOOTER STATUS -->
+        <div class="p-3 bg-[#0d0914] border-t border-orange-950/70 flex items-center justify-between text-xs mono">
+          <span class="text-orange-400/80 flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            SYS LOG: <span id="event-log" class="text-slate-300">Scanner standing by. Click 'Run Autonomous Site Audit'.</span>
+          </span>
+          <span class="text-orange-500/60 text-[11px] hidden sm:inline">DETECTOR: YOLO-EXT-PPE // 60 FPS</span>
         </div>
-      </div>
-
-      <!-- Real-Time HUD Diagnostic Log -->
-      <div class="bg-[#0b0813] border border-orange-950/80 rounded-xl p-3 text-xs mono flex items-center justify-between">
-        <span class="text-orange-400/80 flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          SYS LOG: <span id="event-log" class="text-slate-300">Telemetry engine ready. Press 'Run Surface Audit' to begin.</span>
-        </span>
-        <button type="button" onclick="clearLog()" class="cursor-pointer text-[10px] text-orange-500/60 hover:text-orange-400">[Clear]</button>
       </div>
     </div>
 
-    <!-- RIGHT: MARS TELEMETRY & DROPPE RESOLUTION (4 COLS) -->
+    <!-- RIGHT: TELEMETRY & AUTO-CART (4 COLS) -->
     <div class="lg:col-span-4 flex flex-col gap-4">
 
       <!-- HABITAT SAFETY SCORE -->
-      <div class="bg-[#0e0a16] border border-orange-950/80 rounded-xl p-5 shadow-xl">
+      <div class="bg-[#0c0814] border border-orange-950/80 rounded-xl p-5 shadow-xl">
         <div class="flex justify-between items-center mb-3">
-          <h2 class="text-xs font-mono uppercase tracking-wider text-orange-300/70">Habitat Pressurization</h2>
+          <h2 class="text-xs font-mono uppercase tracking-wider text-orange-300/70">Deck Safety & Compliance Score</h2>
           <span id="score-badge" class="px-2 py-0.5 text-xs font-mono font-bold rounded bg-slate-900 text-slate-400 border border-slate-800">STANDBY</span>
         </div>
 
         <div class="flex items-baseline gap-3 mb-2">
           <span id="score-value" class="text-4xl font-extrabold tracking-tight text-white mono">100%</span>
-          <span id="score-delta" class="text-xs text-orange-300/60 mono">Awaiting scan trigger</span>
+          <span id="score-delta" class="text-xs text-orange-300/60 mono">Awaiting scan</span>
         </div>
 
         <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden mb-4 border border-orange-950">
@@ -209,13 +368,13 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2 text-xs mono pt-2 border-t border-orange-950/60">
-          <div><span class="text-orange-400/60">Outpost Units:</span> <strong class="text-slate-200">1 Verified Rig</strong></div>
-          <div><span class="text-orange-400/60">Breach Events:</span> <strong id="risk-count" class="text-slate-400">0 Active</strong></div>
+          <div><span class="text-orange-400/60">EVA Units:</span> <strong class="text-slate-200">2 Contractors</strong></div>
+          <div><span class="text-orange-400/60">Infractions:</span> <strong id="risk-count" class="text-slate-400">0 Active</strong></div>
         </div>
       </div>
 
       <!-- AUTO-REQUISITION ORDER -->
-      <div class="bg-[#0e0a16] border border-orange-950/80 rounded-xl p-5 shadow-xl flex-1 flex flex-col justify-between">
+      <div class="bg-[#0c0814] border border-orange-950/80 rounded-xl p-5 shadow-xl flex-1 flex flex-col justify-between">
         <div>
           <div class="flex items-center justify-between pb-3 border-b border-orange-950/60">
             <h3 class="text-xs font-mono uppercase tracking-wider text-white flex items-center gap-1.5">
@@ -226,7 +385,7 @@
           </div>
 
           <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
-            Auto-matched against Droppe European orbital depots. Dispatched directly to next Starship window.
+            Auto-matched against Droppe European orbital depots. Resolves safety violations before regional fines hit.
           </p>
 
           <div id="cart-list" class="mt-4 space-y-2.5">
@@ -252,220 +411,118 @@
   </main>
 
   <script>
-    // -------------------------------------------------------------
-    // LOGGING UTILITY
-    // -------------------------------------------------------------
     function logEvent(msg) {
       const el = document.getElementById('event-log');
       if (el) el.textContent = msg;
     }
-    function clearLog() {
-      logEvent("Log cleared. System ready.");
-    }
 
-    // -------------------------------------------------------------
-    // 1. BULLETPROOF WEB AUDIO SYNTHESIZER
-    // -------------------------------------------------------------
-    let audioCtx = null;
-    let audioEnabled = true;
+    // =============================================================
+    // ANIMATED WELDING SPARKS & MARTIAN DUST ENGINE
+    // =============================================================
+    const canvas = document.getElementById('sparks-canvas');
+    let ctx = canvas.getContext('2d');
+    let sparks = [];
+    let dustMotes = [];
 
-    function safeInitAudio() {
-      try {
-        if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx && audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-      } catch (e) {
-        audioEnabled = false;
+    function resizeCanvas() {
+      if (canvas.parentElement) {
+        canvas.width = canvas.parentElement.clientWidth || 800;
+        canvas.height = canvas.parentElement.clientHeight || 500;
       }
     }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    function toggleAudio() {
-      audioEnabled = !audioEnabled;
-      const statusEl = document.getElementById('audio-status');
-      const iconEl = document.getElementById('audio-icon');
-      const btn = document.getElementById('audio-toggle');
-      if (statusEl) statusEl.textContent = audioEnabled ? 'ON' : 'MUTED';
-      if (iconEl) iconEl.textContent = audioEnabled ? '🔊' : '🔇';
-      if (btn) btn.className = audioEnabled 
-        ? "cursor-pointer hover:text-orange-400 transition flex items-center gap-1 text-emerald-400 active:scale-95"
-        : "cursor-pointer hover:text-orange-400 transition flex items-center gap-1 text-slate-500 active:scale-95";
-      logEvent(audioEnabled ? "Audio telemetry enabled." : "Audio muted.");
+    // Dust particles
+    for (let i = 0; i < 35; i++) {
+      dustMotes.push({
+        x: Math.random() * (canvas.width || 800),
+        y: Math.random() * (canvas.height || 500),
+        size: Math.random() * 1.5 + 0.4,
+        speedX: Math.random() * 0.8 + 0.2,
+        speedY: Math.random() * 0.4 - 0.2,
+        alpha: Math.random() * 0.5 + 0.1
+      });
     }
 
-    function playTone(freq, type, duration, endFreq = null) {
-      if (!audioEnabled) return;
-      safeInitAudio();
-      if (!audioCtx) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        if (endFreq) {
-          osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + duration);
-        }
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
+    function createSpark() {
+      // Relative torch position matching SVG coordinates (cx=460, cy=474 on 1200x750 scale)
+      const originX = (460 / 1200) * canvas.width;
+      const originY = (474 / 750) * canvas.height;
+      return {
+        x: originX,
+        y: originY,
+        vx: (Math.random() - 0.5) * 4 - 1.5,
+        vy: (Math.random() * 3) + 1, // Gravity fall
+        life: 1.0,
+        decay: Math.random() * 0.03 + 0.015,
+        color: Math.random() > 0.3 ? '#38bdf8' : '#fb923c'
+      };
     }
 
-    // -------------------------------------------------------------
-    // 2. DUST & REGOLITH PARTICLE ENGINE (HTML5 CANVAS)
-    // -------------------------------------------------------------
-    const canvas = document.getElementById('dust-canvas');
-    let ctx = null;
-    let particles = [];
-    let isStorming = false;
+    function renderEngine() {
+      if (ctx && canvas.width && canvas.height) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (canvas && canvas.getContext) {
-      ctx = canvas.getContext('2d');
-      function resizeCanvas() {
-        if (canvas.parentElement) {
-          canvas.width = canvas.parentElement.clientWidth || 800;
-          canvas.height = canvas.parentElement.clientHeight || 500;
-        }
-      }
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
+        // 1. Draw drifting Martian dust
+        dustMotes.forEach(d => {
+          d.x += d.speedX;
+          d.y += d.speedY;
+          if (d.x > canvas.width) d.x = 0;
+          if (d.y > canvas.height || d.y < 0) d.y = Math.random() * canvas.height;
 
-      class DustParticle {
-        constructor() { this.reset(); }
-        reset() {
-          this.x = Math.random() * (canvas.width || 800);
-          this.y = Math.random() * (canvas.height || 500);
-          this.size = Math.random() * 2 + 0.5;
-          this.speedX = (Math.random() * 1.5 + 0.3) * (isStorming ? 5 : 1);
-          this.speedY = (Math.random() * 0.6 - 0.3) * (isStorming ? 2 : 1);
-          this.alpha = Math.random() * 0.6 + 0.2;
-        }
-        update() {
-          this.x += this.speedX;
-          this.y += this.speedY;
-          if (this.x > canvas.width || this.y > canvas.height || this.y < 0) {
-            this.reset();
-            this.x = 0;
-          }
-        }
-        draw() {
-          if (!ctx) return;
-          ctx.fillStyle = isStorming 
-            ? `rgba(251, 146, 60, ${this.alpha * 1.2})` 
-            : `rgba(249, 115, 22, ${this.alpha * 0.7})`;
+          ctx.fillStyle = `rgba(249, 115, 22, ${d.alpha})`;
           ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
           ctx.fill();
-        }
-      }
+        });
 
-      for (let i = 0; i < 40; i++) {
-        particles.push(new DustParticle());
-      }
+        // 2. Spawn and render plasma welding sparks
+        if (Math.random() > 0.25) {
+          sparks.push(createSpark());
+          sparks.push(createSpark());
+        }
 
-      function animateDust() {
-        if (ctx && canvas.width && canvas.height) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          particles.forEach(p => { p.update(); p.draw(); });
-        }
-        requestAnimationFrame(animateDust);
-      }
-      animateDust();
-    }
+        sparks.forEach((s, idx) => {
+          s.x += s.vx;
+          s.y += s.vy;
+          s.life -= s.decay;
 
-    // -------------------------------------------------------------
-    // 3. DUST STORM SIMULATION
-    // -------------------------------------------------------------
-    function toggleDustStorm() {
-      isStorming = !isStorming;
-      const stormBtn = document.getElementById('storm-btn');
-      const img = document.getElementById('viewport-image');
-      const rad = document.getElementById('telemetry-rad');
-      const pressure = document.getElementById('telemetry-pressure');
-
-      if (isStorming) {
-        if (stormBtn) {
-          stormBtn.className = "cursor-pointer px-3 py-1.5 text-xs font-mono text-orange-950 bg-orange-500 font-bold border border-orange-400 rounded-lg transition active:scale-95 flex items-center gap-1.5 shadow-lg shadow-orange-500/30";
-          stormBtn.innerHTML = `<span>⚡</span> STORM ACTIVE`;
-        }
-        if (img) img.classList.add('blur-[1px]', 'brightness-75', 'saturate-200');
-        if (rad) {
-          rad.textContent = "1,480 µSv/h (CRITICAL)";
-          rad.className = "text-rose-400 font-bold animate-pulse";
-        }
-        if (pressure) pressure.textContent = "740 Pa";
-        playTone(130, 'sawtooth', 0.5, 90);
-        logEvent("WARNING: High-velocity dust storm active. Regolith density x5.");
-      } else {
-        if (stormBtn) {
-          stormBtn.className = "cursor-pointer px-3 py-1.5 text-xs font-mono text-orange-300 bg-orange-950/50 hover:bg-orange-900/70 border border-orange-800/80 rounded-lg transition active:scale-95 flex items-center gap-1.5";
-          stormBtn.innerHTML = `<span>🌪️</span> <span class="hidden sm:inline">Simulate</span> Dust Storm`;
-        }
-        if (img) img.classList.remove('blur-[1px]', 'brightness-75', 'saturate-200');
-        if (rad) {
-          rad.textContent = "240 µSv/h";
-          rad.className = "text-orange-200";
-        }
-        if (pressure) pressure.textContent = "610 Pa";
-        logEvent("Dust storm passed. Atmospheric conditions normalized.");
-      }
-      particles.forEach(p => p.reset());
-    }
-
-    // -------------------------------------------------------------
-    // 4. IMAGE UPLOAD HANDLER
-    // -------------------------------------------------------------
-    function handleImageUpload(e) {
-      try {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const img = document.getElementById('viewport-image');
-          if (img) {
-            img.src = event.target.result;
-            logEvent(`Custom feed loaded: ${file.name}`);
-            runMarsAudit();
+          if (s.life <= 0) {
+            sparks.splice(idx, 1);
+            return;
           }
-        };
-        reader.readAsDataURL(file);
-      } catch (err) {
-        logEvent("Error loading custom image.");
+
+          ctx.fillStyle = s.color;
+          ctx.globalAlpha = s.life;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, Math.random() * 2 + 1, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        });
+
+        // 3. Torch light flicker
+        const torch = document.getElementById('torch-arc');
+        if (torch) {
+          torch.setAttribute('r', (Math.random() * 4 + 6).toString());
+        }
       }
+      requestAnimationFrame(renderEngine);
     }
+    renderEngine();
 
-    // -------------------------------------------------------------
-    // 5. INSPECT TARGET (CLICK BOX)
-    // -------------------------------------------------------------
-    function inspectTarget(title, status, detail) {
-      playTone(950, 'sine', 0.12);
-      logEvent(`INSPECT: ${title} -> ${status} (${detail})`);
-      alert(`🛰️ DROPPE SIGHT TELEMETRY:\n\nComponent: ${title}\nStatus: ${status}\nDiagnostic: ${detail}\nDirect wholesale replenishment mapped.`);
-    }
-
-    // -------------------------------------------------------------
-    // 6. CART MANAGEMENT (WITH INTERACTIVE QUANTITY)
-    // -------------------------------------------------------------
+    // =============================================================
+    // CART & AUDIT LOGIC
+    // =============================================================
     let cartItems = [
-      { id: 'gauntlet', name: 'Cryo-Flex Kevlar Regolith Gauntlet (Pair)', norm: 'EN 1073-2 Mars Vacuum Rated', price: 290, qty: 1 },
-      { id: 'visor', name: 'Titan-Bubble Dual-Layer Gold Visor', norm: '100% Cosmic UV-C Block Filter', price: 410, qty: 1 }
+      { id: 'patch', name: 'Cryo-Flex Kevlar Seal Patch (Knee Unit)', norm: 'EN 1073-2 Mars Vacuum Class 3', price: 180, qty: 1 },
+      { id: 'scrubber', name: 'AeroPack Dual-Canister CO₂ Scrubber Replacement', norm: 'EN 14593-M Compliant', price: 340, qty: 1 }
     ];
 
     function renderCart() {
       const container = document.getElementById('cart-list');
       const totalEl = document.getElementById('cart-total');
       if (!container || !totalEl) return;
-
-      if (cartItems.length === 0) {
-        container.innerHTML = `<div class="py-8 text-center text-xs text-orange-400/40 mono border border-dashed border-orange-950 rounded-lg">Cart cleared. Re-run audit to restage items.</div>`;
-        totalEl.textContent = '€0.00';
-        return;
-      }
 
       let net = 0;
       container.innerHTML = '';
@@ -492,29 +549,16 @@
     }
 
     function modifyQty(id, delta) {
-      playTone(600, 'sine', 0.08);
       const item = cartItems.find(i => i.id === id);
       if (!item) return;
       item.qty += delta;
-      if (item.qty <= 0) {
-        cartItems = cartItems.filter(i => i.id !== id);
-        logEvent(`Removed item from requisition manifest.`);
-      } else {
-        logEvent(`Updated ${item.name} quantity to ${item.qty}.`);
-      }
+      if (item.qty <= 0) cartItems = cartItems.filter(i => i.id !== id);
       renderCart();
     }
 
-    // -------------------------------------------------------------
-    // 7. SURFACE AUDIT RUNNER
-    // -------------------------------------------------------------
     let isScanning = false;
-
     function runMarsAudit() {
-      if (isScanning) {
-        logEvent("Audit currently in progress...");
-        return;
-      }
+      if (isScanning) return;
       isScanning = true;
 
       const container = document.getElementById('canvas-container');
@@ -526,113 +570,57 @@
       const riskCount = document.getElementById('risk-count');
 
       // Clear previous boxes
-      document.querySelectorAll('.hud-box').forEach(b => b.classList.add('hidden'));
-      if (container) container.classList.add('scanning');
-      if (scanBtn) {
-        scanBtn.innerHTML = `<span class="animate-spin">⚙</span> Mapping Regolith...`;
-        scanBtn.classList.add('opacity-75');
-      }
+      document.querySelectorAll('.target-box').forEach(b => b.classList.add('hidden'));
+      container.classList.add('scanning');
+      scanBtn.innerHTML = `<span class="animate-spin">⚙</span> Scanning EVA Suits...`;
+      scanBtn.classList.add('opacity-75');
 
-      logEvent("Sweeping terrain coordinates... Analyzing EN compliance.");
-      playTone(180, 'sawtooth', 0.7, 880);
+      logEvent("Sweeping deck geometry... Tracking contractor EVA gear.");
 
       setTimeout(() => {
-        const b1 = document.getElementById('box-1');
-        if (b1) b1.classList.remove('hidden');
-        playTone(950, 'sine', 0.1);
-        logEvent("Target locked: Life Support Scrubbing Unit (Nominal).");
+        document.getElementById('box-1').classList.remove('hidden');
+        logEvent("Welder Visor Confirmed: EN 166 UV-C Protection verified.");
       }, 550);
 
       setTimeout(() => {
-        const b3 = document.getElementById('box-3');
-        if (b3) b3.classList.remove('hidden');
-        playTone(950, 'sine', 0.1);
-        logEvent("Warning: Radiation visor layer degraded.");
+        document.getElementById('box-3').classList.remove('hidden');
+        logEvent("Contractor 2 Pack Warning: Scrubber filter saturation > 85%.");
       }, 1050);
 
       setTimeout(() => {
-        const b2 = document.getElementById('box-2');
-        if (b2) b2.classList.remove('hidden');
-        playTone(420, 'triangle', 0.25, 210);
-        logEvent("CRITICAL ALERT: Regolith puncture breach detected.");
+        document.getElementById('box-2').classList.remove('hidden');
+        logEvent("CRITICAL BREACH: Welder Right Knee tear detected (14 Pa/s leak)!");
       }, 1450);
 
       setTimeout(() => {
-        if (container) container.classList.remove('scanning');
-        if (scanBtn) {
-          scanBtn.innerHTML = `✓ Re-run Audit`;
-          scanBtn.classList.remove('opacity-75');
-        }
+        container.classList.remove('scanning');
+        scanBtn.innerHTML = `✓ Re-run Site Audit`;
+        scanBtn.classList.remove('opacity-75');
         isScanning = false;
 
-        if (scoreBadge) {
-          scoreBadge.textContent = "VACUUM BREACH WARNING";
-          scoreBadge.className = "px-2 py-0.5 text-xs font-mono font-bold rounded bg-rose-950 border border-rose-600 text-rose-300";
-        }
-        if (scoreValue) {
-          scoreValue.textContent = isStorming ? "41%" : "54%";
-          scoreValue.className = "text-4xl font-extrabold tracking-tight text-rose-400 mono";
-        }
-        if (scoreDelta) scoreDelta.textContent = isStorming ? "-59% Storm Penalty" : "-46% Habitability Penalty";
-        if (scoreBar) {
-          scoreBar.style.width = isStorming ? "41%" : "54%";
-          scoreBar.className = "bg-rose-500 h-2 rounded-full transition-all duration-1000 ease-out";
-        }
-        if (riskCount) {
-          riskCount.textContent = "1 Puncture / 1 Degradation";
-          riskCount.className = "text-rose-400 font-bold";
-        }
+        scoreBadge.textContent = "NON-COMPLIANT";
+        scoreBadge.className = "px-2 py-0.5 text-xs font-mono font-bold rounded bg-rose-950 border border-rose-600 text-rose-300";
+        scoreValue.textContent = "58%";
+        scoreValue.className = "text-4xl font-extrabold tracking-tight text-rose-400 mono";
+        scoreDelta.textContent = "-42% Penalty (1 Critical Breach)";
+        scoreBar.style.width = "58%";
+        scoreBar.className = "bg-rose-500 h-2 rounded-full transition-all duration-1000 ease-out";
+        riskCount.textContent = "1 Puncture / 1 Wear";
+        riskCount.className = "text-rose-400 font-bold";
 
-        // Restock Cart if empty
         if (cartItems.length === 0) {
           cartItems = [
-            { id: 'gauntlet', name: 'Cryo-Flex Kevlar Regolith Gauntlet (Pair)', norm: 'EN 1073-2 Mars Vacuum Rated', price: 290, qty: 1 },
-            { id: 'visor', name: 'Titan-Bubble Dual-Layer Gold Visor', norm: '100% Cosmic UV-C Block Filter', price: 410, qty: 1 }
+            { id: 'patch', name: 'Cryo-Flex Kevlar Seal Patch (Knee Unit)', norm: 'EN 1073-2 Mars Vacuum Class 3', price: 180, qty: 1 },
+            { id: 'scrubber', name: 'AeroPack Dual-Canister CO₂ Scrubber Replacement', norm: 'EN 14593-M Compliant', price: 340, qty: 1 }
           ];
         }
         renderCart();
-        logEvent("Audit completed. Compliance resolution staged in cart.");
+        logEvent("Audit completed. Compliance resolution loaded into cart.");
       }, 1800);
     }
 
-    // -------------------------------------------------------------
-    // 8. SWITCH FEED
-    // -------------------------------------------------------------
-    function switchMarsFeed(feedId) {
-      const img = document.getElementById('viewport-image');
-      const btn1 = document.getElementById('feed-btn-1');
-      const btn2 = document.getElementById('feed-btn-2');
-      document.querySelectorAll('.hud-box').forEach(b => b.classList.add('hidden'));
-
-      if (feedId === 1) {
-        if (img) img.src = "https://upload.wikimedia.org/wikipedia/commons/d/dc/PIA16225_Mars_Curiosity_sol_64_Mastcam.jpg";
-        if (btn1) btn1.className = "cursor-pointer px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-bold text-[11px] transition active:scale-95";
-        if (btn2) btn2.className = "cursor-pointer px-2.5 py-1 rounded bg-slate-900 border border-orange-950 text-orange-200/80 text-[11px] transition active:scale-95 hover:bg-slate-800";
-        logEvent("Switched camera feed to Jezero Basin 04.");
-      } else {
-        if (img) img.src = "https://upload.wikimedia.org/wikipedia/commons/f/fa/Curiosity_Self-Portrait_at_%27Windjana%27_Drilling_Site.jpg";
-        if (btn2) btn2.className = "cursor-pointer px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-bold text-[11px] transition active:scale-95";
-        if (btn1) btn1.className = "cursor-pointer px-2.5 py-1 rounded bg-slate-900 border border-orange-950 text-orange-200/80 text-[11px] transition active:scale-95 hover:bg-slate-800";
-        logEvent("Switched camera feed to Windjana Drill Site.");
-      }
-      runMarsAudit();
-    }
-
-    // -------------------------------------------------------------
-    // 9. DISPATCH ORDER
-    // -------------------------------------------------------------
     function dispatchMarsOrder() {
-      if (cartItems.length === 0) {
-        logEvent("Requisition cart is empty. Re-run audit first.");
-        alert("⚠️ Requisition Cart is empty! Click 'Run Surface Audit' to detect needed equipment.");
-        return;
-      }
-      playTone(523.25, 'sine', 0.15);
-      setTimeout(() => playTone(659.25, 'sine', 0.15), 100);
-      setTimeout(() => playTone(783.99, 'sine', 0.25), 200);
-
-      logEvent("🚀 Manifest confirmed! Dispatched to Droppe Starship Router.");
-      alert("🚀 Orbital Manifest Confirmed!\n\nRequisition items staged for next Starship Cargo Window.\nDispatched to Droppe European Supply Depots.");
+      alert("🚀 Starship Cargo Manifest Confirmed!\n\nReplacements staged for next launch window to Jezero Crater Outpost 04.\nDispatched via Droppe Supply Depots.");
     }
   </script>
 </body>
