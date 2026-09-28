@@ -23,11 +23,12 @@
       position: absolute;
       left: 0;
       width: 100%;
-      height: 3px;
+      height: 4px;
       background: linear-gradient(90deg, rgba(249,115,22,0) 0%, rgba(249,115,22,1) 50%, rgba(249,115,22,0) 100%);
-      box-shadow: 0 0 22px #f97316, 0 0 45px #ea580c;
+      box-shadow: 0 0 25px #f97316, 0 0 50px #ea580c;
       display: none;
       z-index: 25;
+      pointer-events: none;
     }
 
     .scanning .mars-laser {
@@ -43,24 +44,23 @@
     }
 
     @keyframes pulseBox {
-      0%, 100% { transform: scale(1); opacity: 0.92; }
+      0%, 100% { transform: scale(1); opacity: 0.95; }
       50% { transform: scale(1.02); opacity: 1; }
     }
 
     .hud-box {
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      animation: pulseBox 2.2s infinite ease-in-out;
+      animation: pulseBox 2s infinite ease-in-out;
     }
   </style>
 </head>
 <body class="bg-[#07060c] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-orange-500 selection:text-black">
 
   <!-- MARS ATMOSPHERIC TELEMETRY BAR -->
-  <div class="bg-[#100b17] border-b border-orange-950/70 px-4 py-2 flex flex-wrap items-center justify-between text-xs mono text-orange-300/80">
+  <div class="bg-[#100b17] border-b border-orange-950/70 px-4 py-2 flex flex-wrap items-center justify-between text-xs mono text-orange-300/80 relative z-30">
     <div class="flex items-center gap-3">
       <span class="flex items-center gap-1.5 text-orange-400 font-bold">
         <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
-        JEZERO CRATER FEED // SECTOR 04B
+        JEZERO CRATER // SECTOR 04B
       </span>
       <span class="text-orange-900">|</span>
       <span>PRESSURE: <strong id="telemetry-pressure" class="text-orange-200">610 Pa</strong></span>
@@ -70,16 +70,16 @@
       <span class="hidden md:inline">RADIATION: <strong id="telemetry-rad" class="text-orange-200">240 µSv/h</strong></span>
     </div>
     <div class="flex items-center gap-4 text-[11px]">
-      <button onclick="toggleAudio()" id="audio-toggle" class="hover:text-orange-400 transition flex items-center gap-1 text-emerald-400">
+      <button type="button" onclick="toggleAudio()" id="audio-toggle" class="cursor-pointer hover:text-orange-400 transition flex items-center gap-1 text-emerald-400 active:scale-95">
         <span id="audio-icon">🔊</span> AUDIO: <span id="audio-status">ON</span>
       </button>
       <span class="text-orange-900">|</span>
-      <span>STARLINK LATENCY: <strong class="text-emerald-400">3.2 min</strong></span>
+      <span>STARLINK: <strong class="text-emerald-400">SYNCED</strong></span>
     </div>
   </div>
 
   <!-- NAVIGATION -->
-  <header class="border-b border-orange-950/80 bg-[#0c0813]/90 backdrop-blur sticky top-0 z-30">
+  <header class="border-b border-orange-950/80 bg-[#0c0813]/95 backdrop-blur sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-orange-500/30">
@@ -93,40 +93,40 @@
 
       <div class="flex items-center gap-2 sm:gap-3">
         <!-- Storm Simulator Toggle -->
-        <button onclick="toggleDustStorm()" id="storm-btn" class="px-3 py-1.5 text-xs font-mono text-orange-300 bg-orange-950/40 hover:bg-orange-900/60 border border-orange-800/80 rounded-lg transition flex items-center gap-1.5">
+        <button type="button" onclick="toggleDustStorm()" id="storm-btn" class="cursor-pointer px-3 py-1.5 text-xs font-mono text-orange-300 bg-orange-950/50 hover:bg-orange-900/70 border border-orange-800/80 rounded-lg transition active:scale-95 flex items-center gap-1.5">
           <span>🌪️</span> <span class="hidden sm:inline">Simulate</span> Dust Storm
         </button>
 
-        <!-- Custom Upload -->
-        <label class="px-3 py-1.5 text-xs font-mono text-slate-300 bg-slate-900 hover:bg-slate-800 border border-orange-950 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+        <!-- Custom Image Uploader -->
+        <label class="cursor-pointer px-3 py-1.5 text-xs font-mono text-slate-300 bg-slate-900 hover:bg-slate-800 border border-orange-950 rounded-lg transition active:scale-95 flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
           <span class="hidden sm:inline">Custom</span> Feed
           <input type="file" id="image-loader" accept="image/*" class="hidden" onchange="handleImageUpload(event)" />
         </label>
 
         <!-- Audit Action -->
-        <button onclick="runMarsAudit()" id="scan-btn" class="px-4 py-2 text-xs font-bold bg-orange-500 hover:bg-orange-400 text-slate-950 rounded-lg shadow-lg shadow-orange-500/25 transition flex items-center gap-2 mono">
+        <button type="button" onclick="runMarsAudit()" id="scan-btn" class="cursor-pointer px-4 py-2 text-xs font-bold bg-orange-500 hover:bg-orange-400 text-slate-950 rounded-lg shadow-lg shadow-orange-500/25 transition active:scale-95 flex items-center gap-2 mono">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-          Run Audit
+          Run Surface Audit
         </button>
       </div>
     </div>
   </header>
 
   <!-- MAIN HUD -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
 
     <!-- LEFT: MARTIAN HUD VIEWPORT (8 COLS) -->
     <div class="lg:col-span-8 flex flex-col gap-4">
       <div class="relative bg-black rounded-2xl border border-orange-950/80 overflow-hidden shadow-2xl" id="canvas-container">
         
         <div class="relative w-full aspect-[16/10] overflow-hidden bg-black" id="viewport-frame">
-          <!-- Actual Mars Surface Terrain (NASA JPL Mastcam Panorama) -->
+          <!-- Mars Surface Terrain (NASA JPL Mastcam Panorama) -->
           <img 
             id="viewport-image"
             src="https://upload.wikimedia.org/wikipedia/commons/d/dc/PIA16225_Mars_Curiosity_sol_64_Mastcam.jpg" 
             alt="Mars Jezero Crater Surface" 
-            class="w-full h-full object-cover filter contrast-110 saturate-125 transition-all duration-700"
+            class="w-full h-full object-cover filter contrast-110 saturate-125 transition-all duration-700 pointer-events-none select-none"
           />
 
           <!-- Atmospheric Canvas (Dynamic Regolith Dust Particles) -->
@@ -145,38 +145,47 @@
           <div class="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-orange-500 pointer-events-none z-20"></div>
           <div class="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-orange-500 pointer-events-none z-20"></div>
 
-          <!-- TARGET 1: LIFE SUPPORT RIG (Surface Drilling Rig / O2 Scrubber) -->
-          <div id="box-1" class="hud-box absolute hidden border-2 border-emerald-400 bg-emerald-500/10 rounded z-20 cursor-pointer" style="top: 48%; left: 42%; width: 18%; height: 28%;" onclick="inspectTarget('O2 Scrubber', 'Nominal', 'EN 14593-M Certified')">
+          <!-- TARGET 1: LIFE SUPPORT RIG -->
+          <div id="box-1" class="hud-box absolute hidden border-2 border-emerald-400 bg-emerald-500/15 rounded z-30 cursor-pointer transition hover:bg-emerald-500/30" style="top: 48%; left: 42%; width: 18%; height: 28%;" onclick="inspectTarget('Regolith Filter', 'Nominal', 'EN 14593-M Active (99.1% Scrub)')">
             <div class="absolute -top-6 left-0 bg-emerald-950/95 border border-emerald-500 text-emerald-300 text-[10px] mono px-2 py-0.5 rounded shadow whitespace-nowrap">
-              ✓ EN 14593-M (Regolith Filter Active // 99.1% Scrub Rate)
+              ✓ EN 14593-M (O₂ Nominal)
             </div>
           </div>
 
-          <!-- TARGET 2: PRESSURE HULL BREACH (CRITICAL FAULT) -->
-          <div id="box-2" class="hud-box absolute hidden border-2 border-rose-500 bg-rose-500/20 rounded shadow-lg shadow-rose-500/30 z-20 cursor-pointer" style="top: 60%; left: 62%; width: 15%; height: 16%;" onclick="inspectTarget('Regolith Puncture', 'Critical Leak', '14 Pa/s bleed rate')">
+          <!-- TARGET 2: PRESSURE HULL BREACH -->
+          <div id="box-2" class="hud-box absolute hidden border-2 border-rose-500 bg-rose-500/20 rounded shadow-lg shadow-rose-500/30 z-30 cursor-pointer transition hover:bg-rose-500/35" style="top: 60%; left: 62%; width: 15%; height: 16%;" onclick="inspectTarget('Pressure Breach', 'CRITICAL', 'Regolith seal bleed: 14 Pa/s')">
             <div class="absolute -bottom-7 right-0 bg-rose-950/95 border border-rose-500 text-rose-300 text-[10px] mono px-2 py-0.5 rounded flex items-center gap-1 shadow whitespace-nowrap">
               <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
-              CRITICAL: Regolith Puncture Detected (Seal Bleed: 14 Pa/s)
+              CRITICAL: Puncture (14 Pa/s)
             </div>
           </div>
 
-          <!-- TARGET 3: ATMOSPHERIC RADIATION SHIELDING -->
-          <div id="box-3" class="hud-box absolute hidden border-2 border-amber-400 bg-amber-500/15 rounded z-20 cursor-pointer" style="top: 36%; left: 24%; width: 16%; height: 20%;" onclick="inspectTarget('Shielding degradation', 'Warning', 'Exceeds 420 mSv/a threshold')">
+          <!-- TARGET 3: RADIATION SHIELDING -->
+          <div id="box-3" class="hud-box absolute hidden border-2 border-amber-400 bg-amber-500/20 rounded z-30 cursor-pointer transition hover:bg-amber-500/35" style="top: 36%; left: 24%; width: 16%; height: 20%;" onclick="inspectTarget('Ion Shielding', 'WARNING', 'Surface exposure exceeds 420 mSv/a')">
             <div class="absolute -bottom-6 left-0 bg-amber-950/90 border border-amber-500 text-amber-300 text-[10px] mono px-2 py-0.5 rounded shadow whitespace-nowrap">
-              ⚡ WARNING: Heavy Ion Shielding Degradation (>420 mSv/a)
+              ⚡ WARNING: Shield Wear (>420 mSv)
             </div>
           </div>
         </div>
 
         <!-- Canvas Controls -->
-        <div class="p-3 bg-[#0d0914] border-t border-orange-950/70 flex items-center justify-between text-xs mono">
+        <div class="p-3 bg-[#0d0914] border-t border-orange-950/70 flex items-center justify-between text-xs mono relative z-30">
           <div class="flex items-center gap-2">
             <span class="text-orange-300/70">Feed Select:</span>
-            <button onclick="switchMarsFeed(1)" id="feed-btn-1" class="px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-bold text-[11px] transition">Jezero Basin 04</button>
-            <button onclick="switchMarsFeed(2)" id="feed-btn-2" class="px-2.5 py-1 rounded bg-slate-900 border border-orange-950 text-orange-200/80 text-[11px] transition">Windjana Drill Site</button>
+            <button type="button" onclick="switchMarsFeed(1)" id="feed-btn-1" class="cursor-pointer px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-bold text-[11px] transition active:scale-95">Jezero Basin 04</button>
+            <button type="button" onclick="switchMarsFeed(2)" id="feed-btn-2" class="cursor-pointer px-2.5 py-1 rounded bg-slate-900 border border-orange-950 text-orange-200/80 text-[11px] transition active:scale-95 hover:bg-slate-800">Windjana Drill Site</button>
           </div>
-          <span class="text-orange-500/60 text-[11px]">GRAV: 0.38g // OPTICAL DETECTOR: YOLO-v8 EXT</span>
+          <span class="text-orange-500/60 text-[11px]">GRAV: 0.38g // YOLO-v8 EXT ACTIVE</span>
         </div>
+      </div>
+
+      <!-- Real-Time HUD Diagnostic Log -->
+      <div class="bg-[#0b0813] border border-orange-950/80 rounded-xl p-3 text-xs mono flex items-center justify-between">
+        <span class="text-orange-400/80 flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          SYS LOG: <span id="event-log" class="text-slate-300">Telemetry engine ready. Press 'Run Surface Audit' to begin.</span>
+        </span>
+        <button type="button" onclick="clearLog()" class="cursor-pointer text-[10px] text-orange-500/60 hover:text-orange-400">[Clear]</button>
       </div>
     </div>
 
@@ -186,7 +195,7 @@
       <!-- HABITAT SAFETY SCORE -->
       <div class="bg-[#0e0a16] border border-orange-950/80 rounded-xl p-5 shadow-xl">
         <div class="flex justify-between items-center mb-3">
-          <h2 class="text-xs font-mono uppercase tracking-wider text-orange-300/70">Habitat Pressurization Status</h2>
+          <h2 class="text-xs font-mono uppercase tracking-wider text-orange-300/70">Habitat Pressurization</h2>
           <span id="score-badge" class="px-2 py-0.5 text-xs font-mono font-bold rounded bg-slate-900 text-slate-400 border border-slate-800">STANDBY</span>
         </div>
 
@@ -217,12 +226,12 @@
           </div>
 
           <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
-            Auto-matched against Droppe European orbital depots. Dispatched directly to next Starship cargo window.
+            Auto-matched against Droppe European orbital depots. Dispatched directly to next Starship window.
           </p>
 
           <div id="cart-list" class="mt-4 space-y-2.5">
-            <div class="py-8 text-center text-xs text-orange-400/40 mono">
-              Trigger scan to detect atmospheric leaks and damaged shielding.
+            <div class="py-8 text-center text-xs text-orange-400/40 mono border border-dashed border-orange-950 rounded-lg">
+              Run audit to populate compliance requisitions.
             </div>
           </div>
         </div>
@@ -233,7 +242,7 @@
             <span id="cart-total" class="text-base font-bold text-orange-400">€0.00</span>
           </div>
 
-          <button id="dispatch-btn" onclick="dispatchMarsOrder()" disabled class="w-full py-2.5 bg-slate-900 border border-orange-950 text-slate-500 text-xs font-bold uppercase tracking-wider rounded-lg transition mono cursor-not-allowed">
+          <button type="button" id="dispatch-btn" onclick="dispatchMarsOrder()" class="cursor-pointer w-full py-2.5 bg-orange-500 hover:bg-orange-400 active:scale-95 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-lg transition mono shadow-lg shadow-orange-500/25">
             Dispatch Starship Cargo Manifest
           </button>
         </div>
@@ -244,29 +253,52 @@
 
   <script>
     // -------------------------------------------------------------
-    // 1. PURE WEB AUDIO SYNTHESIZER (NO EXTERNAL AUDIO FILES)
+    // LOGGING UTILITY
+    // -------------------------------------------------------------
+    function logEvent(msg) {
+      const el = document.getElementById('event-log');
+      if (el) el.textContent = msg;
+    }
+    function clearLog() {
+      logEvent("Log cleared. System ready.");
+    }
+
+    // -------------------------------------------------------------
+    // 1. BULLETPROOF WEB AUDIO SYNTHESIZER
     // -------------------------------------------------------------
     let audioCtx = null;
     let audioEnabled = true;
 
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function safeInitAudio() {
+      try {
+        if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch (e) {
+        audioEnabled = false;
       }
     }
 
     function toggleAudio() {
       audioEnabled = !audioEnabled;
-      document.getElementById('audio-status').textContent = audioEnabled ? 'ON' : 'MUTED';
-      document.getElementById('audio-icon').textContent = audioEnabled ? '🔊' : '🔇';
-      document.getElementById('audio-toggle').className = audioEnabled 
-        ? "hover:text-orange-400 transition flex items-center gap-1 text-emerald-400"
-        : "hover:text-orange-400 transition flex items-center gap-1 text-slate-500";
+      const statusEl = document.getElementById('audio-status');
+      const iconEl = document.getElementById('audio-icon');
+      const btn = document.getElementById('audio-toggle');
+      if (statusEl) statusEl.textContent = audioEnabled ? 'ON' : 'MUTED';
+      if (iconEl) iconEl.textContent = audioEnabled ? '🔊' : '🔇';
+      if (btn) btn.className = audioEnabled 
+        ? "cursor-pointer hover:text-orange-400 transition flex items-center gap-1 text-emerald-400 active:scale-95"
+        : "cursor-pointer hover:text-orange-400 transition flex items-center gap-1 text-slate-500 active:scale-95";
+      logEvent(audioEnabled ? "Audio telemetry enabled." : "Audio muted.");
     }
 
     function playTone(freq, type, duration, endFreq = null) {
       if (!audioEnabled) return;
-      initAudio();
+      safeInitAudio();
+      if (!audioCtx) return;
       try {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -284,87 +316,70 @@
       } catch (e) {}
     }
 
-    function soundLaserSweep() {
-      playTone(180, 'sawtooth', 0.8, 880);
-    }
-
-    function soundTargetLock() {
-      playTone(950, 'sine', 0.12);
-    }
-
-    function soundBreachAlert() {
-      playTone(420, 'triangle', 0.25, 210);
-    }
-
-    function soundOrderConfirm() {
-      if (!audioEnabled) return;
-      initAudio();
-      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-        setTimeout(() => playTone(freq, 'sine', 0.2), idx * 80);
-      });
-    }
-
     // -------------------------------------------------------------
     // 2. DUST & REGOLITH PARTICLE ENGINE (HTML5 CANVAS)
     // -------------------------------------------------------------
     const canvas = document.getElementById('dust-canvas');
-    const ctx = canvas.getContext('2d');
+    let ctx = null;
     let particles = [];
     let isStorming = false;
 
-    function resizeCanvas() {
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    class DustParticle {
-      constructor() {
-        this.reset();
-      }
-      reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() * 1.5 + 0.3) * (isStorming ? 5 : 1);
-        this.speedY = (Math.random() * 0.6 - 0.3) * (isStorming ? 2 : 1);
-        this.alpha = Math.random() * 0.6 + 0.2;
-      }
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x > canvas.width || this.y > canvas.height || this.y < 0) {
-          this.reset();
-          this.x = 0;
+    if (canvas && canvas.getContext) {
+      ctx = canvas.getContext('2d');
+      function resizeCanvas() {
+        if (canvas.parentElement) {
+          canvas.width = canvas.parentElement.clientWidth || 800;
+          canvas.height = canvas.parentElement.clientHeight || 500;
         }
       }
-      draw() {
-        ctx.fillStyle = isStorming 
-          ? `rgba(251, 146, 60, ${this.alpha * 1.2})` 
-          : `rgba(249, 115, 22, ${this.alpha * 0.7})`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      class DustParticle {
+        constructor() { this.reset(); }
+        reset() {
+          this.x = Math.random() * (canvas.width || 800);
+          this.y = Math.random() * (canvas.height || 500);
+          this.size = Math.random() * 2 + 0.5;
+          this.speedX = (Math.random() * 1.5 + 0.3) * (isStorming ? 5 : 1);
+          this.speedY = (Math.random() * 0.6 - 0.3) * (isStorming ? 2 : 1);
+          this.alpha = Math.random() * 0.6 + 0.2;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x > canvas.width || this.y > canvas.height || this.y < 0) {
+            this.reset();
+            this.x = 0;
+          }
+        }
+        draw() {
+          if (!ctx) return;
+          ctx.fillStyle = isStorming 
+            ? `rgba(251, 146, 60, ${this.alpha * 1.2})` 
+            : `rgba(249, 115, 22, ${this.alpha * 0.7})`;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
-    }
 
-    for (let i = 0; i < 45; i++) {
-      particles.push(new DustParticle());
-    }
+      for (let i = 0; i < 40; i++) {
+        particles.push(new DustParticle());
+      }
 
-    function animateDust() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        p.update();
-        p.draw();
-      });
-      requestAnimationFrame(animateDust);
+      function animateDust() {
+        if (ctx && canvas.width && canvas.height) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          particles.forEach(p => { p.update(); p.draw(); });
+        }
+        requestAnimationFrame(animateDust);
+      }
+      animateDust();
     }
-    animateDust();
 
     // -------------------------------------------------------------
-    // 3. DUST STORM SIMULATION TOGGLE
+    // 3. DUST STORM SIMULATION
     // -------------------------------------------------------------
     function toggleDustStorm() {
       isStorming = !isStorming;
@@ -374,54 +389,132 @@
       const pressure = document.getElementById('telemetry-pressure');
 
       if (isStorming) {
-        stormBtn.className = "px-3 py-1.5 text-xs font-mono text-orange-950 bg-orange-500 font-bold border border-orange-400 rounded-lg transition flex items-center gap-1.5 shadow-lg shadow-orange-500/30";
-        stormBtn.innerHTML = `<span>⚡</span> STORM ACTIVE`;
-        img.classList.add('blur-[1px]', 'brightness-75', 'saturate-200');
-        rad.textContent = "1,480 µSv/h (CRITICAL)";
-        rad.className = "text-rose-400 font-bold animate-pulse";
-        pressure.textContent = "740 Pa";
-        playTone(130, 'sawtooth', 0.6, 90);
+        if (stormBtn) {
+          stormBtn.className = "cursor-pointer px-3 py-1.5 text-xs font-mono text-orange-950 bg-orange-500 font-bold border border-orange-400 rounded-lg transition active:scale-95 flex items-center gap-1.5 shadow-lg shadow-orange-500/30";
+          stormBtn.innerHTML = `<span>⚡</span> STORM ACTIVE`;
+        }
+        if (img) img.classList.add('blur-[1px]', 'brightness-75', 'saturate-200');
+        if (rad) {
+          rad.textContent = "1,480 µSv/h (CRITICAL)";
+          rad.className = "text-rose-400 font-bold animate-pulse";
+        }
+        if (pressure) pressure.textContent = "740 Pa";
+        playTone(130, 'sawtooth', 0.5, 90);
+        logEvent("WARNING: High-velocity dust storm active. Regolith density x5.");
       } else {
-        stormBtn.className = "px-3 py-1.5 text-xs font-mono text-orange-300 bg-orange-950/40 hover:bg-orange-900/60 border border-orange-800/80 rounded-lg transition flex items-center gap-1.5";
-        stormBtn.innerHTML = `<span>🌪️</span> <span class="hidden sm:inline">Simulate</span> Dust Storm`;
-        img.classList.remove('blur-[1px]', 'brightness-75', 'saturate-200');
-        rad.textContent = "240 µSv/h";
-        rad.className = "text-orange-200";
-        pressure.textContent = "610 Pa";
+        if (stormBtn) {
+          stormBtn.className = "cursor-pointer px-3 py-1.5 text-xs font-mono text-orange-300 bg-orange-950/50 hover:bg-orange-900/70 border border-orange-800/80 rounded-lg transition active:scale-95 flex items-center gap-1.5";
+          stormBtn.innerHTML = `<span>🌪️</span> <span class="hidden sm:inline">Simulate</span> Dust Storm`;
+        }
+        if (img) img.classList.remove('blur-[1px]', 'brightness-75', 'saturate-200');
+        if (rad) {
+          rad.textContent = "240 µSv/h";
+          rad.className = "text-orange-200";
+        }
+        if (pressure) pressure.textContent = "610 Pa";
+        logEvent("Dust storm passed. Atmospheric conditions normalized.");
       }
       particles.forEach(p => p.reset());
     }
 
     // -------------------------------------------------------------
-    // 4. CUSTOM IMAGE UPLOADER HANDLER
+    // 4. IMAGE UPLOAD HANDLER
     // -------------------------------------------------------------
     function handleImageUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const img = document.getElementById('viewport-image');
-        img.src = event.target.result;
-        runMarsAudit();
-      };
-      reader.readAsDataURL(file);
+      try {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = document.getElementById('viewport-image');
+          if (img) {
+            img.src = event.target.result;
+            logEvent(`Custom feed loaded: ${file.name}`);
+            runMarsAudit();
+          }
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        logEvent("Error loading custom image.");
+      }
     }
 
     // -------------------------------------------------------------
-    // 5. INSPECT BOUNDING BOX CLICK
+    // 5. INSPECT TARGET (CLICK BOX)
     // -------------------------------------------------------------
     function inspectTarget(title, status, detail) {
-      soundTargetLock();
-      alert(`🛰️ DROPPE TELEMETRY INSPECTION:\n\nComponent: ${title}\nStatus: ${status}\nDiagnostic: ${detail}\nSourcing: Direct API dispatch enabled.`);
+      playTone(950, 'sine', 0.12);
+      logEvent(`INSPECT: ${title} -> ${status} (${detail})`);
+      alert(`🛰️ DROPPE SIGHT TELEMETRY:\n\nComponent: ${title}\nStatus: ${status}\nDiagnostic: ${detail}\nDirect wholesale replenishment mapped.`);
     }
 
     // -------------------------------------------------------------
-    // 6. SURFACE AUDIT RUNNER
+    // 6. CART MANAGEMENT (WITH INTERACTIVE QUANTITY)
+    // -------------------------------------------------------------
+    let cartItems = [
+      { id: 'gauntlet', name: 'Cryo-Flex Kevlar Regolith Gauntlet (Pair)', norm: 'EN 1073-2 Mars Vacuum Rated', price: 290, qty: 1 },
+      { id: 'visor', name: 'Titan-Bubble Dual-Layer Gold Visor', norm: '100% Cosmic UV-C Block Filter', price: 410, qty: 1 }
+    ];
+
+    function renderCart() {
+      const container = document.getElementById('cart-list');
+      const totalEl = document.getElementById('cart-total');
+      if (!container || !totalEl) return;
+
+      if (cartItems.length === 0) {
+        container.innerHTML = `<div class="py-8 text-center text-xs text-orange-400/40 mono border border-dashed border-orange-950 rounded-lg">Cart cleared. Re-run audit to restage items.</div>`;
+        totalEl.textContent = '€0.00';
+        return;
+      }
+
+      let net = 0;
+      container.innerHTML = '';
+      cartItems.forEach(item => {
+        const lineTotal = item.price * item.qty;
+        net += lineTotal;
+        const div = document.createElement('div');
+        div.className = "bg-slate-900 border border-orange-900/60 p-2.5 rounded-lg flex items-center justify-between text-xs";
+        div.innerHTML = `
+          <div>
+            <div class="font-bold text-white">${item.name}</div>
+            <div class="text-[10px] text-orange-400/80 mono">${item.norm}</div>
+            <div class="text-orange-200 mono mt-1">€${item.price} × ${item.qty} = <span class="font-bold text-orange-400">€${lineTotal}</span></div>
+          </div>
+          <div class="flex items-center gap-1.5 ml-2">
+            <button type="button" onclick="modifyQty('${item.id}', -1)" class="cursor-pointer w-6 h-6 bg-slate-800 hover:bg-orange-500 hover:text-black rounded text-orange-200 font-bold transition flex items-center justify-center active:scale-90">-</button>
+            <span class="mono font-bold text-white px-1">${item.qty}</span>
+            <button type="button" onclick="modifyQty('${item.id}', 1)" class="cursor-pointer w-6 h-6 bg-slate-800 hover:bg-orange-500 hover:text-black rounded text-orange-200 font-bold transition flex items-center justify-center active:scale-90">+</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+      totalEl.textContent = `€${net.toLocaleString('fi-FI', { minimumFractionDigits: 2 })}`;
+    }
+
+    function modifyQty(id, delta) {
+      playTone(600, 'sine', 0.08);
+      const item = cartItems.find(i => i.id === id);
+      if (!item) return;
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cartItems = cartItems.filter(i => i.id !== id);
+        logEvent(`Removed item from requisition manifest.`);
+      } else {
+        logEvent(`Updated ${item.name} quantity to ${item.qty}.`);
+      }
+      renderCart();
+    }
+
+    // -------------------------------------------------------------
+    // 7. SURFACE AUDIT RUNNER
     // -------------------------------------------------------------
     let isScanning = false;
 
     function runMarsAudit() {
-      if (isScanning) return;
+      if (isScanning) {
+        logEvent("Audit currently in progress...");
+        return;
+      }
       isScanning = true;
 
       const container = document.getElementById('canvas-container');
@@ -431,72 +524,80 @@
       const scoreDelta = document.getElementById('score-delta');
       const scoreBar = document.getElementById('score-bar');
       const riskCount = document.getElementById('risk-count');
-      const cartList = document.getElementById('cart-list');
-      const cartTotal = document.getElementById('cart-total');
-      const dispatchBtn = document.getElementById('dispatch-btn');
 
+      // Clear previous boxes
       document.querySelectorAll('.hud-box').forEach(b => b.classList.add('hidden'));
-      container.classList.add('scanning');
-      scanBtn.innerHTML = `<span class="animate-spin">⚙</span> Mapping Regolith...`;
-      scanBtn.classList.add('opacity-75');
+      if (container) container.classList.add('scanning');
+      if (scanBtn) {
+        scanBtn.innerHTML = `<span class="animate-spin">⚙</span> Mapping Regolith...`;
+        scanBtn.classList.add('opacity-75');
+      }
 
-      soundLaserSweep();
+      logEvent("Sweeping terrain coordinates... Analyzing EN compliance.");
+      playTone(180, 'sawtooth', 0.7, 880);
 
       setTimeout(() => {
-        document.getElementById('box-1').classList.remove('hidden');
-        soundTargetLock();
+        const b1 = document.getElementById('box-1');
+        if (b1) b1.classList.remove('hidden');
+        playTone(950, 'sine', 0.1);
+        logEvent("Target locked: Life Support Scrubbing Unit (Nominal).");
       }, 550);
 
       setTimeout(() => {
-        document.getElementById('box-3').classList.remove('hidden');
-        soundTargetLock();
+        const b3 = document.getElementById('box-3');
+        if (b3) b3.classList.remove('hidden');
+        playTone(950, 'sine', 0.1);
+        logEvent("Warning: Radiation visor layer degraded.");
       }, 1050);
 
       setTimeout(() => {
-        document.getElementById('box-2').classList.remove('hidden');
-        soundBreachAlert();
+        const b2 = document.getElementById('box-2');
+        if (b2) b2.classList.remove('hidden');
+        playTone(420, 'triangle', 0.25, 210);
+        logEvent("CRITICAL ALERT: Regolith puncture breach detected.");
       }, 1450);
 
       setTimeout(() => {
-        container.classList.remove('scanning');
-        scanBtn.innerHTML = `✓ Re-run Audit`;
-        scanBtn.classList.remove('opacity-75');
+        if (container) container.classList.remove('scanning');
+        if (scanBtn) {
+          scanBtn.innerHTML = `✓ Re-run Audit`;
+          scanBtn.classList.remove('opacity-75');
+        }
         isScanning = false;
 
-        scoreBadge.textContent = "VACUUM BREACH WARNING";
-        scoreBadge.className = "px-2 py-0.5 text-xs font-mono font-bold rounded bg-rose-950 border border-rose-600 text-rose-300";
-        scoreValue.textContent = isStorming ? "41%" : "54%";
-        scoreValue.className = "text-4xl font-extrabold tracking-tight text-rose-400 mono";
-        scoreDelta.textContent = isStorming ? "-59% Storm Critical" : "-46% Habitability Penalty";
-        scoreBar.style.width = isStorming ? "41%" : "54%";
-        scoreBar.className = "bg-rose-500 h-2 rounded-full transition-all duration-1000 ease-out";
-        riskCount.textContent = "1 Puncture / 1 Degradation";
-        riskCount.className = "text-rose-400 font-bold";
+        if (scoreBadge) {
+          scoreBadge.textContent = "VACUUM BREACH WARNING";
+          scoreBadge.className = "px-2 py-0.5 text-xs font-mono font-bold rounded bg-rose-950 border border-rose-600 text-rose-300";
+        }
+        if (scoreValue) {
+          scoreValue.textContent = isStorming ? "41%" : "54%";
+          scoreValue.className = "text-4xl font-extrabold tracking-tight text-rose-400 mono";
+        }
+        if (scoreDelta) scoreDelta.textContent = isStorming ? "-59% Storm Penalty" : "-46% Habitability Penalty";
+        if (scoreBar) {
+          scoreBar.style.width = isStorming ? "41%" : "54%";
+          scoreBar.className = "bg-rose-500 h-2 rounded-full transition-all duration-1000 ease-out";
+        }
+        if (riskCount) {
+          riskCount.textContent = "1 Puncture / 1 Degradation";
+          riskCount.className = "text-rose-400 font-bold";
+        }
 
-        cartList.innerHTML = `
-          <div class="bg-slate-900 border border-rose-900/60 p-2.5 rounded-lg flex items-center justify-between text-xs">
-            <div>
-              <div class="font-bold text-white">Cryo-Flex Kevlar Regolith Gauntlet (Pair)</div>
-              <div class="text-[11px] text-orange-400/80 mono">EN 1073-2 Mars Vacuum Rated</div>
-            </div>
-            <span class="font-mono text-orange-400 font-bold">€290.00</span>
-          </div>
-
-          <div class="bg-slate-900 border border-amber-900/60 p-2.5 rounded-lg flex items-center justify-between text-xs">
-            <div>
-              <div class="font-bold text-white">Titan-Bubble Dual-Layer Gold Visor</div>
-              <div class="text-[11px] text-orange-400/80 mono">100% Cosmic UV-C Block Filter</div>
-            </div>
-            <span class="font-mono text-orange-400 font-bold">€410.00</span>
-          </div>
-        `;
-
-        cartTotal.textContent = "€700.00 (Excl. Orbital Freight)";
-        dispatchBtn.disabled = false;
-        dispatchBtn.className = "w-full py-2.5 bg-orange-500 hover:bg-orange-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-lg transition mono shadow-lg shadow-orange-500/25";
+        // Restock Cart if empty
+        if (cartItems.length === 0) {
+          cartItems = [
+            { id: 'gauntlet', name: 'Cryo-Flex Kevlar Regolith Gauntlet (Pair)', norm: 'EN 1073-2 Mars Vacuum Rated', price: 290, qty: 1 },
+            { id: 'visor', name: 'Titan-Bubble Dual-Layer Gold Visor', norm: '100% Cosmic UV-C Block Filter', price: 410, qty: 1 }
+          ];
+        }
+        renderCart();
+        logEvent("Audit completed. Compliance resolution staged in cart.");
       }, 1800);
     }
 
+    // -------------------------------------------------------------
+    // 8. SWITCH FEED
+    // -------------------------------------------------------------
     function switchMarsFeed(feedId) {
       const img = document.getElementById('viewport-image');
       const btn1 = document.getElementById('feed-btn-1');
@@ -504,20 +605,34 @@
       document.querySelectorAll('.hud-box').forEach(b => b.classList.add('hidden'));
 
       if (feedId === 1) {
-        img.src = "https://upload.wikimedia.org/wikipedia/commons/d/dc/PIA16225_Mars_Curiosity_sol_64_Mastcam.jpg";
-        btn1.className = "px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-bold text-[11px] transition";
-        btn2.className = "px-2.5 py-1 rounded bg-slate-900 border border-orange-950 text-orange-200/80 text-[11px] transition";
+        if (img) img.src = "https://upload.wikimedia.org/wikipedia/commons/d/dc/PIA16225_Mars_Curiosity_sol_64_Mastcam.jpg";
+        if (btn1) btn1.className = "cursor-pointer px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-bold text-[11px] transition active:scale-95";
+        if (btn2) btn2.className = "cursor-pointer px-2.5 py-1 rounded bg-slate-900 border border-orange-950 text-orange-200/80 text-[11px] transition active:scale-95 hover:bg-slate-800";
+        logEvent("Switched camera feed to Jezero Basin 04.");
       } else {
-        img.src = "https://upload.wikimedia.org/wikipedia/commons/f/fa/Curiosity_Self-Portrait_at_%27Windjana%27_Drilling_Site.jpg";
-        btn2.className = "px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-bold text-[11px] transition";
-        btn1.className = "px-2.5 py-1 rounded bg-slate-900 border border-orange-950 text-orange-200/80 text-[11px] transition";
+        if (img) img.src = "https://upload.wikimedia.org/wikipedia/commons/f/fa/Curiosity_Self-Portrait_at_%27Windjana%27_Drilling_Site.jpg";
+        if (btn2) btn2.className = "cursor-pointer px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-bold text-[11px] transition active:scale-95";
+        if (btn1) btn1.className = "cursor-pointer px-2.5 py-1 rounded bg-slate-900 border border-orange-950 text-orange-200/80 text-[11px] transition active:scale-95 hover:bg-slate-800";
+        logEvent("Switched camera feed to Windjana Drill Site.");
       }
       runMarsAudit();
     }
 
+    // -------------------------------------------------------------
+    // 9. DISPATCH ORDER
+    // -------------------------------------------------------------
     function dispatchMarsOrder() {
-      soundOrderConfirm();
-      alert("🚀 Orbital Manifest Confirmed!\n\n• 1x Cryo-Flex Kevlar Regolith Gauntlet\n• 1x Titan-Bubble Dual-Layer Gold Visor\n\nRouting directly to Starship Cargo Hub (Departure: Launch Window 03).");
+      if (cartItems.length === 0) {
+        logEvent("Requisition cart is empty. Re-run audit first.");
+        alert("⚠️ Requisition Cart is empty! Click 'Run Surface Audit' to detect needed equipment.");
+        return;
+      }
+      playTone(523.25, 'sine', 0.15);
+      setTimeout(() => playTone(659.25, 'sine', 0.15), 100);
+      setTimeout(() => playTone(783.99, 'sine', 0.25), 200);
+
+      logEvent("🚀 Manifest confirmed! Dispatched to Droppe Starship Router.");
+      alert("🚀 Orbital Manifest Confirmed!\n\nRequisition items staged for next Starship Cargo Window.\nDispatched to Droppe European Supply Depots.");
     }
   </script>
 </body>
