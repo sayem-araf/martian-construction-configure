@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Droppe Sight | Autonomous PPE & Site Compliance Scanner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    @keyframes scanSweep {
+      0% { top: 0%; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    .laser-line {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(56,189,248,0) 0%, rgba(56,189,248,1) 50%, rgba(56,189,248,0) 100%);
+      box-shadow: 0 0 18px #38bdf8, 0 0 35px #0284c7;
+      display: none;
+      z-index: 25;
+    }
+
+    .scanning .laser-line {
+      display: block;
+      animation: scanSweep 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .grid-overlay {
+      background-size: 24px 24px;
+      background-image: 
+        linear-gradient(to right, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+    }
+
+    @keyframes pulseTarget {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.02); opacity: 1; }
+    }
+
+    .target-box {
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: pulseTarget 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-[#070c18] text-slate-100 min-h-screen flex flex-col antialiased">
+
+  <!-- TOP STATUS BAR -->
+  <div class="bg-[#0b1326] border-b border-slate-800 px-4 py-2 flex items-center justify-between text-xs mono text-slate-400">
+    <div class="flex items-center gap-3">
+      <span class="flex items-center gap-1.5 text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        CAMERA FEED 04 // ACTIVE
+      </span>
+      <span class="hidden sm:inline text-slate-600">|</span>
+      <span class="hidden sm:inline">SITE: KATAJANOKKA QUAY 02</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span>MODEL: <strong class="text-sky-400 font-bold">YOLO-PPE-v8 (TENSOR-RT)</strong></span>
+      <span>LATENCY: <strong class="text-emerald-400">28ms</strong></span>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <header class="border-b border-slate-800/80 bg-[#091122]/90 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-sky-500 flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-sky-500/20">
+          D
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="font-extrabold text-lg tracking-tight text-white">DROPPE</span>
+          <span class="text-xs font-bold text-sky-400 mono tracking-wider bg-sky-950/80 border border-sky-800 px-1.5 py-0.5 rounded">SIGHT</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="runAudit()" id="scan-btn" class="px-4 py-2 text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-lg shadow-lg shadow-sky-500/20 transition flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Run Instant Site Audit
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN INTERFACE -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT: SCANNER CANVAS (8 COLS) -->
+    <div class="lg:col-span-8 flex flex-col gap-4">
+      <div class="relative bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl group" id="canvas-container">
+        
+        <!-- Live Video/Image Frame -->
+        <div class="relative w-full aspect-[16/10] overflow-hidden bg-slate-900">
+          <img 
+            id="viewport-image"
+            src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=1200&auto=format&fit=crop&q=80" 
+            alt="Active Job Site" 
+            class="w-full h-full object-cover filter contrast-105"
+          />
+
+          <!-- HUD Digital Grid Overlay -->
+          <div class="absolute inset-0 grid-overlay pointer-events-none opacity-40"></div>
+
+          <!-- Laser Scan Line -->
+          <div class="laser-line" id="laser"></div>
+
+          <!-- HUD Corner Reticles -->
+          <div class="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-sky-400 pointer-events-none"></div>
+          <div class="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-sky-400 pointer-events-none"></div>
+          <div class="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-sky-400 pointer-events-none"></div>
+          <div class="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-sky-400 pointer-events-none"></div>
+
+          <!-- BOUNDING BOX 1: HARD HAT (PASS - GREEN) -->
+          <div id="box-1" class="target-box absolute hidden border-2 border-emerald-400 bg-emerald-500/10 rounded" style="top: 14%; left: 38%; width: 22%; height: 26%;">
+            <div class="absolute -top-6 left-0 bg-emerald-950/90 border border-emerald-500 text-emerald-300 text-[10px] mono px-1.5 py-0.5 rounded shadow">
+              ✓ EN 397 (Hard Hat Confirmed)
+            </div>
+          </div>
+
+          <!-- BOUNDING BOX 2: EYE PROTECTION (CRITICAL VIOLATION - RED) -->
+          <div id="box-2" class="target-box absolute hidden border-2 border-rose-500 bg-rose-500/15 rounded shadow-lg shadow-rose-500/20" style="top: 28%; left: 44%; width: 14%; height: 10%;">
+            <div class="absolute -bottom-6 left-0 bg-rose-950/95 border border-rose-500 text-rose-300 text-[10px] mono px-1.5 py-0.5 rounded flex items-center gap-1 shadow">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping"></span>
+              ⚠️ VIOLATION: Missing EN 166 Eye Protection
+            </div>
+          </div>
+
+          <!-- BOUNDING BOX 3: HI-VIS VEST (WEAR WARNING - YELLOW) -->
+          <div id="box-3" class="target-box absolute hidden border-2 border-amber-400 bg-amber-500/10 rounded" style="top: 42%; left: 32%; width: 34%; height: 42%;">
+            <div class="absolute -bottom-6 right-0 bg-amber-950/90 border border-amber-500 text-amber-300 text-[10px] mono px-1.5 py-0.5 rounded shadow">
+              ⚡ WEAR: EN ISO 20471 Hi-Vis < 50% Lumens
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Footer Controls -->
+        <div class="p-3 bg-[#0b1326] border-t border-slate-800/80 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400 font-medium">Scenario Preset:</span>
+            <button onclick="switchScenario(1)" class="px-2.5 py-1 rounded bg-sky-500 text-slate-950 font-bold text-[11px] transition">Structural Assembly</button>
+            <button onclick="switchScenario(2)" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white font-medium text-[11px] transition">Welding Bay</button>
+          </div>
+          <span class="text-slate-500 mono text-[11px]">FOV: 84° // Telemetry Sync: 100%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: TELEMETRY & DROPPE RESOLUTION CART (4 COLS) -->
+    <div class="lg:col-span-4 flex flex-col gap-4">
+
+      <!-- COMPLIANCE METRICS CARD -->
+      <div class="bg-[#0b1326] border border-slate-800 rounded-xl p-5 shadow-xl">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-xs font-mono uppercase tracking-wider text-slate-400">Site Compliance Score</h2>
+          <span id="score-badge" class="px-2 py-0.5 text-xs font-mono font-bold rounded bg-slate-800 text-slate-400">STANDBY</span>
+        </div>
+
+        <div class="flex items-baseline gap-3 mb-2">
+          <span id="score-value" class="text-4xl font-extrabold tracking-tight text-white mono">100%</span>
+          <span id="score-delta" class="text-xs text-slate-500">Awaiting scan trigger</span>
+        </div>
+
+        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden mb-4">
+          <div id="score-bar" class="bg-emerald-400 h-2 rounded-full transition-all duration-1000 ease-out" style="width: 100%"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs mono pt-2 border-t border-slate-800/80">
+          <div><span class="text-slate-500">Personnel Scanned:</span> <strong class="text-slate-200">2 Workers</strong></div>
+          <div><span class="text-slate-500">EN Infractions:</span> <strong id="risk-count" class="text-slate-400">0 Detected</strong></div>
+        </div>
+      </div>
+
+      <!-- ONE-CLICK DROPPE RESOLUTION CART -->
+      <div class="bg-[#0b1326] border border-slate-800 rounded-xl p-5 shadow-xl flex-1 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-xs font-mono uppercase tracking-wider text-white flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+              Instant Compliance Resolution
+            </h3>
+            <span class="text-[10px] text-sky-400 mono">Wholesale Pricing</span>
+          </div>
+
+          <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+            Auto-populated with Droppe in-stock SKUs to immediately resolve detected EN infractions on-site.
+          </p>
+
+          <div id="cart-list" class="mt-4 space-y-2.5">
+            <div class="py-8 text-center text-xs text-slate-600 mono">
+              Run scan to populate missing gear.
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-800">
+          <div class="flex justify-between items-baseline mb-3 mono">
+            <span class="text-xs text-slate-400">Net Requisition Total:</span>
+            <span id="cart-total" class="text-base font-bold text-sky-400">€0.00</span>
+          </div>
+
+          <button id="dispatch-btn" onclick="dispatchOrder()" disabled class="w-full py-2.5 bg-slate-800 text-slate-500 text-xs font-bold uppercase tracking-wider rounded-lg transition mono cursor-not-allowed">
+            Dispatch 1-Click Order to Site
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    let isScanning = false;
+
+    function runAudit() {
+      if (isScanning) return;
+      isScanning = true;
+
+      const container = document.getElementById('canvas-container');
+      const scanBtn = document.getElementById('scan-btn');
+      const scoreBadge = document.getElementById('score-badge');
+      const scoreValue = document.getElementById('score-value');
+      const scoreDelta = document.getElementById('score-delta');
+      const scoreBar = document.getElementById('score-bar');
+      const riskCount = document.getElementById('risk-count');
+      const cartList = document.getElementById('cart-list');
+      const cartTotal = document.getElementById('cart-total');
+      const dispatchBtn = document.getElementById('dispatch-btn');
+
+      // Reset
+      document.querySelectorAll('.target-box').forEach(b => b.classList.add('hidden'));
+      container.classList.add('scanning');
+      scanBtn.innerHTML = `<span class="animate-spin">⚙</span> Scanning Site Geometry...`;
+      scanBtn.classList.add('opacity-75');
+
+      setTimeout(() => {
+        document.getElementById('box-1').classList.remove('hidden');
+      }, 500);
+
+      setTimeout(() => {
+        document.getElementById('box-2').classList.remove('hidden');
+      }, 950);
+
+      setTimeout(() => {
+        document.getElementById('box-3').classList.remove('hidden');
+      }, 1300);
+
+      // Finish scan
+      setTimeout(() => {
+        container.classList.remove('scanning');
+        scanBtn.innerHTML = `✓ Audit Complete (Re-run)`;
+        scanBtn.classList.remove('opacity-75');
+        isScanning = false;
+
+        // Telemetry Update
+        scoreBadge.textContent = "NON-COMPLIANT";
+        scoreBadge.className = "px-2 py-0.5 text-xs font-mono font-bold rounded bg-rose-950/80 border border-rose-600 text-rose-300";
+        scoreValue.textContent = "68%";
+        scoreValue.className = "text-4xl font-extrabold tracking-tight text-rose-400 mono";
+        scoreDelta.textContent = "-32% penalty applied";
+        scoreBar.style.width = "68%";
+        scoreBar.className = "bg-rose-500 h-2 rounded-full transition-all duration-1000 ease-out";
+        riskCount.textContent = "2 Critical Flags";
+        riskCount.className = "text-rose-400 font-bold";
+
+        // Auto-Populate Droppe Cart
+        cartList.innerHTML = `
+          <div class="bg-slate-900 border border-rose-900/50 p-2.5 rounded-lg flex items-center justify-between text-xs animate-fade-in">
+            <div>
+              <div class="font-bold text-white">3M SecureFit 400 Clear Lens (EN 166)</div>
+              <div class="text-[11px] text-slate-400 mono">Resolves: Worker 1 Eye Violation</div>
+            </div>
+            <span class="font-mono text-sky-400 font-bold">€9.80</span>
+          </div>
+
+          <div class="bg-slate-900 border border-amber-900/50 p-2.5 rounded-lg flex items-center justify-between text-xs animate-fade-in">
+            <div>
+              <div class="font-bold text-white">Helly Hansen Voss Hi-Vis Vest Cl. 2</div>
+              <div class="text-[11px] text-slate-400 mono">Resolves: Worn Reflective Stripe</div>
+            </div>
+            <span class="font-mono text-sky-400 font-bold">€16.50</span>
+          </div>
+        `;
+
+        cartTotal.textContent = "€26.30 (excl. VAT)";
+        dispatchBtn.disabled = false;
+        dispatchBtn.className = "w-full py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-lg transition mono shadow-lg shadow-sky-500/20";
+      }, 1600);
+    }
+
+    function switchScenario(num) {
+      const img = document.getElementById('viewport-image');
+      document.querySelectorAll('.target-box').forEach(b => b.classList.add('hidden'));
+      
+      if (num === 1) {
+        img.src = "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=1200&auto=format&fit=crop&q=80";
+      } else {
+        img.src = "https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?w=1200&auto=format&fit=crop&q=80";
+      }
+      runAudit();
+    }
+
+    function dispatchOrder() {
+      alert("✅ Order dispatched directly to Droppe Order Routing Engine!\n\n• 1x 3M SecureFit 400 Glasses\n• 1x Helly Hansen Hi-Vis Vest\n\nDelivery scheduled to: Katajanokka Quay 02 Site Hub.");
+    }
+  </script>
+</body>
+</html>
